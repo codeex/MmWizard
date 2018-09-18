@@ -8,6 +8,10 @@ namespace MmWizard.Models
     public class Artical : BaseSortModel
     {
         /// <summary>
+        /// 模板名
+        /// </summary>
+        public string TemplateName { get; set; }
+        /// <summary>
         /// 标题
         /// </summary>
         public string Title { get; set; }

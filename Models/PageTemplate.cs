@@ -11,6 +11,11 @@ namespace MmWizard.Models
     public class PageTemplate : BaseModel
     {
         /// <summary>
+        /// 模板名
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// 模板内容 razor
         /// </summary>
         public string Content { get; set; }
