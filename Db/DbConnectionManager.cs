@@ -144,50 +144,73 @@ namespace MmWizard.Db
         {
             var m = obj as DbConnectionManager;
             if (m == null) return;
+            var i = 0;
 
-            List<DbConnectionWrapper> removeList = null;
+            var removeList = new List<DbConnectionWrapper>();
             while (true)
             {
+                removeList.Clear();
                 Random rnd = new Random(DateTime.Now.Millisecond);
                 lock (m._lockObject)
                 {
                     //检查 能用的连接列表
                     int mayDelete = m._dbCanUse.Count - m._initConn;
                     var arr = m._dbCanUse.Where(x => x.CanUse()).ToList();
-                    removeList = m._dbCanUse.Where(x => !x.CanUse()).ToList();
-                    if (arr.Count >= m._initConn && removeList.Count > 0)
+                    var arrNotUse = m._dbCanUse.Where(x => !x.CanUse()).ToList();
+                    if (arr.Count >= m._initConn)
                     {
                         //一次仅删除一个，缓慢释放
-                        removeList = removeList.Take(1).ToList();
-                        removeList.ForEach(x => m._dbCanUse.Remove(x));
-                    }
-                    else if (arr.Count >= m._initConn && mayDelete > 0)
-                    {
-                        removeList = m._dbCanUse.Where(x => x.IdleTime(m._checkConnTimeout)).Take(1).ToList();
-                        removeList.ForEach(x => m._dbCanUse.Remove(x));
-                    }
-                    else if (arr.Count < m._initConn && removeList.Count > 0)
+                        if(arrNotUse.Count > 0)
+                        {
+                            var rm = arrNotUse.FirstOrDefault();
+                            m._dbCanUse.Remove(rm);
+                            removeList.Add(rm);
+                        }
+                        else if(arr.Count > m._initConn)
+                        {
+                            //如果超时，则删除，否则先不动
+                            var rm = m._dbCanUse.OrderBy(x=>x.LastAccessed).FirstOrDefault();
+                            if (rm.IdleTime(m._checkConnTimeout))
+                            {
+                                m._dbCanUse.Remove(rm);
+                                removeList.Add(rm);
+                            }
+                        }
+                    }                    
+                    else if (arr.Count < m._initConn && arrNotUse.Count > 0)
                     { //先重建1连接
 
-                        var dbw = removeList[rnd.Next(0, removeList.Count - 1)];
+                        var dbw = arrNotUse[rnd.Next(0, arrNotUse.Count - 1)];
+                        dbw.MarkAccessed();
                         try { 
                             dbw.Conn?.OpenAsync();
                             }
                         catch { }
-                        removeList.Clear();
                     }
 
                     //检查正在用的列表，超时的一律删除,一次删除一个
                     var tw = m._dbUsed.FirstOrDefault(x => x.IdleTime(m._checkConnTimeout));
                     if(tw != null)
                     {
-                        m._dbUsed.Remove(tw);
-                        removeList.Add(tw);
+                        if (m._dbCanUse.Count < m._initConn)
+                        {
+                            m._dbUsed.Remove(tw);
+                            tw.MarkAccessed();
+                            m._dbCanUse.Add(tw);
+                        }
+                        else
+                        {
+                            m._dbUsed.Remove(tw);
+                            removeList.Add(tw);
+                        }
                     }
 
                 }
-
-                Logger?.LogInformation($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
+                if (++i % 10 == 0)
+                {
+                    Logger?.LogInformation($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
+                    i = 0;
+                }
                 // Trace.WriteLine($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
                 removeList?.ForEach(x =>
                 {

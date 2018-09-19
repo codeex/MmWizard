@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ namespace MmWizard.Models
     public static class SiteConfig
     {
         private static IConfigurationSection _appSection = null;
+        private static Dictionary<string, string> _dictSql;
 
         /// <summary>
         /// API域名地址
@@ -31,8 +33,31 @@ namespace MmWizard.Models
             {
                 throw new Exception("未配置站点节点Config");
             }
+
+            try
+            {
+                var xmlPath = Path.Combine(Directory.GetCurrentDirectory(), "mysql.xml");
+                var cfg = (new ConfigurationBuilder()).AddXmlFile(xmlPath).Build();
+                _dictSql = cfg.Get<Dictionary<string, string>>();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("mysql.xml文件解析失败", ex);
+            }
+
         }
 
+        public static string GetSql(string key)
+        {
+            if (_dictSql.ContainsKey(key))
+            {
+                return _dictSql[key];
+            }
+            else
+            {
+                throw new Exception($"没有找到Key[{key}]指定的Sql");
+            }
+        }
         public static RedisServer GetRedisConfig()
         {
             var connKey = "Redis";

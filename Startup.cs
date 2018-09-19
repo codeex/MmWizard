@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -42,9 +43,18 @@ namespace MmWizard
                 .BuildServiceProvider()
                 .GetService<ILoggerFactory>()
                 .AddConsole();
-            SiteConfig.SetAppSetting(Configuration.GetSection("Config"));
+            try
+            {
+                SiteConfig.SetAppSetting(Configuration.GetSection("Config"));
+            }
+            catch(Exception ex)
+            {
+                logger.CreateLogger("Cfg").LogError(ex, "配置失败,关闭系统");
+                throw ex;
+            }
             RedisConnectionManager.Logger = logger.CreateLogger("Redis");
 
+            
             services.AddDbService(new DbConnOption(SiteConfig.GetConnString()));
 
             //检查redis和db

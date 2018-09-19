@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using MmWizard.Db;
 using MmWizard.Models;
 using Dapper;
+using System.Threading;
 
 namespace MmWizard.Controllers
 {
@@ -19,13 +20,12 @@ namespace MmWizard.Controllers
         }
         public IActionResult Index()
         {
-            for (int i = 0; i < 100; i++)
+            
+            using (var conn = _db.GetConn())
             {
-                var conn = _db.GetConn();
-                {
-                    var a = conn.Conn.Query<Article>("select * from article");
-                }
+                var a = conn.Conn.Query<Article>(SiteConfig.GetSql("GetBigClass"));
             }
+
             return View();
         }
 
