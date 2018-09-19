@@ -1,4 +1,4 @@
-CREATE TABLE artical (
+CREATE TABLE article (
   Id int(11) NOT NULL AUTO_INCREMENT,
   Sort int(11) DEFAULT 0,
   Title varchar(255) NOT NULL,

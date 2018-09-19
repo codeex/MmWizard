@@ -187,7 +187,8 @@ namespace MmWizard.Db
 
                 }
 
-                Trace.WriteLine($"数据库可用连接：{m._dbCanUse.Count}");
+                Logger?.LogInformation($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
+                // Trace.WriteLine($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
                 removeList?.ForEach(x =>
                 {
                     try {

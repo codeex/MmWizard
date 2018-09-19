@@ -4,14 +4,28 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MmWizard.Db;
 using MmWizard.Models;
+using Dapper;
 
 namespace MmWizard.Controllers
 {
     public class HomeController : Controller
     {
+        private IDbService _db;
+        public HomeController(IDbService db)
+        {
+            this._db = db;
+        }
         public IActionResult Index()
         {
+            for (int i = 0; i < 100; i++)
+            {
+                var conn = _db.GetConn();
+                {
+                    var a = conn.Conn.Query<Article>("select * from article");
+                }
+            }
             return View();
         }
 

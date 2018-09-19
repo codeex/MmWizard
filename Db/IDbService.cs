@@ -7,6 +7,6 @@ namespace MmWizard.Db
 {
     public interface IDbService
     {
-        
+        DbConnectionWrapper GetConn();
     }
 }

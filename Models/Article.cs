@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MmWizard.Models
 {
-    public class Artical : BaseSortModel
+    public class Article : BaseSortModel
     {
         /// <summary>
         /// 模板名

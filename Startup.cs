@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using MmWizard.Db;
 using MmWizard.Helper;
 using MmWizard.Models;
 using MySql.Data.MySqlClient;
@@ -43,6 +44,8 @@ namespace MmWizard
                 .AddConsole();
             SiteConfig.SetAppSetting(Configuration.GetSection("Config"));
             RedisConnectionManager.Logger = logger.CreateLogger("Redis");
+
+            services.AddDbService(new DbConnOption(SiteConfig.GetConnString()));
 
             //检查redis和db
             //using (var conn = new MySqlConnection(SiteConfig.ConnString()))

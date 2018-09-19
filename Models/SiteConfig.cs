@@ -13,7 +13,7 @@ namespace MmWizard.Models
         /// <summary>
         /// API域名地址
         /// </summary>
-        public static string ConnString()
+        public static string GetConnString()
         {
             var connKey = "ConnString";
             string str = string.Empty;
@@ -33,7 +33,7 @@ namespace MmWizard.Models
             }
         }
 
-        public static RedisServer RedisConfig()
+        public static RedisServer GetRedisConfig()
         {
             var connKey = "Redis";
             string str = string.Empty;
