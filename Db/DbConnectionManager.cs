@@ -17,7 +17,7 @@ namespace MmWizard.Db
         private List<DbConnectionWrapper> _dbUsed = new List<DbConnectionWrapper>();
         private DbConnOption _connInfo;
         private int _initConn;
-        private int _checkConnTimeout = 60 * 1000; //60s
+        private int _checkConnTimeout = 60 ; //60s
         
 
         /// <summary>
