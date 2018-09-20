@@ -47,14 +47,15 @@ namespace MmWizard
             {
                 SiteConfig.SetAppSetting(Configuration.GetSection("Config"));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.CreateLogger("Cfg").LogError(ex, "配置失败,关闭系统");
                 throw ex;
             }
+
             RedisConnectionManager.Logger = logger.CreateLogger("Redis");
 
-            
+
             services.AddDbService(new DbConnOption(SiteConfig.GetConnString()));
 
             //检查redis和db
@@ -69,6 +70,7 @@ namespace MmWizard
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            ServiceLocator.Instance = app.ApplicationServices;
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -78,6 +80,7 @@ namespace MmWizard
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
@@ -88,6 +91,12 @@ namespace MmWizard
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        public static class ServiceLocator
+        {
+            public static IServiceProvider Instance { get; set; }
+
         }
     }
 }

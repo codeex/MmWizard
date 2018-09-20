@@ -35,6 +35,7 @@ namespace MmWizard.Controllers
             {
                 var a = conn.Conn.Query<Article>(SiteConfig.GetSql("GetBigClass"));
             }
+
             return View();
         }
 

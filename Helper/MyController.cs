@@ -15,6 +15,7 @@ namespace MmWizard.Helper
 
         public MyController(IDbService db)
         {
+            ServiceLocator.Instance
             this._db = db;
         }
 
