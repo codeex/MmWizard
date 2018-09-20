@@ -21,25 +21,20 @@ namespace MmWizard.Controllers
         public IActionResult Index()
         {
             
-            using (var conn = _db.GetConn())
-            {
-                var a = conn.Conn.Query<Article>(SiteConfig.GetSql("GetBigClass"));
-            }
-
             return View();
         }
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
-
             return View();
         }
 
-        public IActionResult Contact()
+        public IActionResult Article()
         {
-            ViewData["Message"] = "Your contact page.";
-
+            using (var conn = _db.GetConn())
+            {
+                var a = conn.Conn.Query<Article>(SiteConfig.GetSql("GetBigClass"));
+            }
             return View();
         }
 

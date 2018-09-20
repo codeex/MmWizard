@@ -3,4 +3,7 @@
   <GetBigClass>
     select * from article;
   </GetBigClass>
+  <GetArticlePage>
+    select * from article;
+  </GetArticlePage>
 </MySql>

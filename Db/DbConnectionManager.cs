@@ -10,6 +10,11 @@ using MySql.Data.MySqlClient;
 
 namespace MmWizard.Db
 {
+    /// <summary>
+    /// 连接池不是替换Ado.Net连接池功能，
+    /// 此处仅仅检查和主动释放连接，以避免连接泄露
+    /// 连接使用原则： 最迟打开，最早释放
+    /// </summary>
     public class DbConnectionManager
     {
         private object _lockObject = new object();
@@ -18,14 +23,15 @@ namespace MmWizard.Db
         private DbConnOption _connInfo;
         private int _initConn;
         private int _checkConnTimeout = 60 ; //60s
-        
+
 
         /// <summary>
         /// 使用连接信息构造一个数据库连接管理类
         /// </summary>
         /// <param name="connInfo"></param>
-        /// <param name="initConn">初始连接</param>
-        public DbConnectionManager(DbConnOption connInfo, int initConn = 5)
+        /// <param name="initConn">初始连接:5,建议和最小池子数一致</param>
+        /// <param name="timeout">30s</param>
+        public DbConnectionManager(DbConnOption connInfo, int initConn = 5, int timeout = 30)
         {
             this._initConn = initConn;
             this._connInfo = new DbConnOption(connInfo.DbConnectionString,connInfo.DbConnectionType);
@@ -58,31 +64,36 @@ namespace MmWizard.Db
         public DbConnectionWrapper GetConnection()
         {
             Random rnd = new Random(DateTime.Now.Millisecond);
-            lock (this._lockObject)
-            {
-                int tryNum = this._dbCanUse.Count;
-                //随机返回一个
-                if (this._dbCanUse.Count > 0)
-                {
-                    checkCanUse:
-                    var dbw = _dbCanUse[rnd.Next(0, this._dbCanUse.Count-1)];
-                    if (!dbw.CanUse())
-                    {
-                        if (--tryNum > 0)
-                        {
-                            goto checkCanUse;
-                        }
-                        else
-                        {
-                            goto createNew;
-                        }
-                    }
 
-                    this._dbCanUse.Remove(dbw);
-                    this._dbUsed.Add(dbw);
-                    dbw.MarkAccessed();
-                    return dbw;
-                }                
+            //双重检查，减轻lock压力
+            if (this._dbCanUse.Count > 0)
+            {
+                lock (this._lockObject)
+                {
+                    int tryNum = this._dbCanUse.Count;
+                    //随机返回一个
+                    if (tryNum > 0)
+                    {
+                        checkCanUse:
+                        var dbw = _dbCanUse[rnd.Next(0, this._dbCanUse.Count - 1)];
+                        if (!dbw.CanUse())
+                        {
+                            if (--tryNum > 0)
+                            {
+                                goto checkCanUse;
+                            }
+                            else
+                            {
+                                goto createNew;
+                            }
+                        }
+
+                        this._dbCanUse.Remove(dbw);
+                        this._dbUsed.Add(dbw);
+                        dbw.MarkRefUsed();
+                        return dbw;
+                    }
+                }
             }
 
             createNew:
@@ -93,6 +104,7 @@ namespace MmWizard.Db
                 throw new Exception($"数据库({this._connInfo.GetDescInfo()})无法取到连接!");
             }
 
+            dbwNew.MarkRefUsed();
             lock (this._lockObject)
             {
                 this._dbUsed.Add(dbwNew);                
@@ -105,11 +117,10 @@ namespace MmWizard.Db
         /// 关闭连接，返回连接池
         /// </summary>
         /// <param name="dbw"></param>
-        public void CloseConn(DbConnectionWrapper dbw)
+        public void ReleaseConn(DbConnectionWrapper dbw)
         {
             if (dbw == null) return;
 
-            dbw.MarkAccessed();
             lock (this._lockObject)
             {
                 if(this._dbUsed.Contains(dbw))
@@ -153,60 +164,26 @@ namespace MmWizard.Db
                 Random rnd = new Random(DateTime.Now.Millisecond);
                 lock (m._lockObject)
                 {
+                    m._dbCanUse.RemoveAll(x => !x.CanUse());
                     //检查 能用的连接列表
-                    int mayDelete = m._dbCanUse.Count - m._initConn;
-                    var arr = m._dbCanUse.Where(x => x.CanUse()).ToList();
-                    var arrNotUse = m._dbCanUse.Where(x => !x.CanUse()).ToList();
-                    if (arr.Count >= m._initConn)
+                    if (m._dbCanUse.Count > m._initConn)
                     {
                         //一次仅删除一个，缓慢释放
-                        if(arrNotUse.Count > 0)
+                        //如果超时，则删除，否则先不动
+                        var rm = m._dbCanUse.OrderBy(x=>x.LastAccessed).FirstOrDefault();
+                        if (rm != null && rm.IdleTime(m._checkConnTimeout))
                         {
-                            var rm = arrNotUse.FirstOrDefault();
                             m._dbCanUse.Remove(rm);
                             removeList.Add(rm);
                         }
-                        else if(arr.Count > m._initConn)
-                        {
-                            //如果超时，则删除，否则先不动
-                            var rm = m._dbCanUse.OrderBy(x=>x.LastAccessed).FirstOrDefault();
-                            if (rm.IdleTime(m._checkConnTimeout))
-                            {
-                                m._dbCanUse.Remove(rm);
-                                removeList.Add(rm);
-                            }
-                        }
-                    }                    
-                    else if (arr.Count < m._initConn && arrNotUse.Count > 0)
-                    { //先重建1连接
-
-                        var dbw = arrNotUse[rnd.Next(0, arrNotUse.Count - 1)];
-                        dbw.MarkAccessed();
-                        try { 
-                            dbw.Conn?.OpenAsync();
-                            }
-                        catch { }
-                    }
+                    } 
 
                     //检查正在用的列表，超时的一律删除,一次删除一个
                     var tw = m._dbUsed.FirstOrDefault(x => x.IdleTime(m._checkConnTimeout));
-                    if(tw != null)
-                    {
-                        if (m._dbCanUse.Count < m._initConn)
-                        {
-                            m._dbUsed.Remove(tw);
-                            tw.MarkAccessed();
-                            m._dbCanUse.Add(tw);
-                        }
-                        else
-                        {
-                            m._dbUsed.Remove(tw);
-                            removeList.Add(tw);
-                        }
-                    }
+                    tw?.Dispose();
 
                 }
-                if (++i % 10 == 0)
+                if (++i % 50 == 0)
                 {
                     Logger?.LogInformation($"数据库可用连接：{m._dbCanUse.Count}，数据库正在用连接：{m._dbUsed.Count}");
                     i = 0;
@@ -238,7 +215,6 @@ namespace MmWizard.Db
             }
 
             int tryConn = 0;
-
             tryConn:
             try
             {
@@ -262,7 +238,7 @@ namespace MmWizard.Db
                 Random rnd = new Random(DateTime.Now.Millisecond);
                 if(++tryConn < 3)
                 {                    
-                    Thread.Sleep(rnd.Next(800,15000));
+                    Thread.Sleep(rnd.Next(500,5000));
                     goto tryConn;
                 }
                 Logger?.LogError($"数据库({this._connInfo.GetDescInfo()})连接失败[{tryConn}]", null);

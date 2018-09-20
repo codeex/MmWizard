@@ -1669,6 +1669,8 @@
     <Content Include="wwwroot\bower_components\jvectormap\.bower.json" />
     <Content Include="wwwroot\bower_components\jvectormap\jquery-jvectormap.css" />
     <Content Include="wwwroot\bower_components\jvectormap\jvectormap.jquery.json" />
+    <Content Include="wwwroot\bower_components\Microsoft.jQuery.Unobtrusive.Ajax\.bower.json" />
+    <Content Include="wwwroot\bower_components\Microsoft.jQuery.Unobtrusive.Ajax\bower.json" />
     <Content Include="wwwroot\bower_components\mocha\.bower.json" />
     <Content Include="wwwroot\bower_components\mocha\bower.json" />
     <Content Include="wwwroot\bower_components\mocha\mocha.css" />
@@ -5485,6 +5487,8 @@
     <None Include="wwwroot\bower_components\jvectormap\lib\vml-shape-element.js" />
     <None Include="wwwroot\bower_components\jvectormap\lib\world-map.js" />
     <None Include="wwwroot\bower_components\jvectormap\README.md" />
+    <None Include="wwwroot\bower_components\Microsoft.jQuery.Unobtrusive.Ajax\jquery.unobtrusive-ajax.js" />
+    <None Include="wwwroot\bower_components\Microsoft.jQuery.Unobtrusive.Ajax\jquery.unobtrusive-ajax.min.js" />
     <None Include="wwwroot\bower_components\mocha\History.md" />
     <None Include="wwwroot\bower_components\mocha\LICENSE" />
     <None Include="wwwroot\bower_components\mocha\media\logo.svg" />
@@ -6079,6 +6083,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.jQuery.Unobtrusive.Ajax" Version="3.2.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="RazorLight" Version="2.0.0-beta1" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.505" />
@@ -6093,6 +6099,10 @@
     <None Update="mysql.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Protocal\" />
   </ItemGroup>
 
 </Project>
