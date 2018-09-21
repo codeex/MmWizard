@@ -9,17 +9,27 @@ using MmWizard.Protocol;
 
 namespace MmWizard.Helper
 {
+    [Produces("application/json")]
+    [Route("api/[controller]/[action]")]
+    [ApiController]
     public class MyController : ControllerBase
     {
         protected IDbService _db;
+        protected Args<object> _args;
 
         public MyController(IDbService db)
         {
-            ServiceLocator.Instance
             this._db = db;
         }
 
-        public Result<T> Execute<T>(Func<T> func)
+        public Args<object> Args => this._args;
+
+        public void SetArgs(Args<object> args)
+        {
+            this._args = args.Copy();
+        }
+
+        protected Result<T> Execute<T>(Func<T> func)
         {
             var ret = new Result<T>()
             {

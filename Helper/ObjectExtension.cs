@@ -9,28 +9,7 @@ namespace MmWizard.Helper
 {
     public static class ObjectExtension
     {
-        public static Result<T> ToResult<T>(Func<T> func)
-        {
-            var ret = new Result<T>()
-            {
-                rid = Guid.NewGuid().ToString("N")
-            };
-            try
-            {
-                var t = func();
-                ret.v = t;
-                ret.c = StatusCode.OK.code;
-                ret.msg = StatusCode.OK.msg;
-            }
-            catch (Exception ex)
-            {
-                ret.v = default(T);
-                ret.rid = Guid.NewGuid().ToString("N");
-                ret.c = StatusCode.ServerError.code;
-                ret.msg = $"{StatusCode.ServerError.msg}:{GetExceptionString(ex)}";
-            }
-            return ret;
-        }
+       
         private static string GetExceptionString(Exception ex)
         {
             StringBuilder sb = new StringBuilder();

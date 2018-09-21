@@ -11,9 +11,6 @@ using MmWizard.Protocol;
 
 namespace MmWizard.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[controller]")]
-    [ApiController]
     // [EnableCors("AllowAll")]
     public class ArticleController : MyController
     {
@@ -23,17 +20,17 @@ namespace MmWizard.Controllers
             
         }
 
-        public Result<PageResult<Article>> GetArticlePage(Args<SearchParameters> args)
+        public Result<PageResult<Article>> GetArticlePage(SearchParameters args)
         {
             return Execute(() =>
             {
                 using (var conn = this._db.GetConn())
                 {
-                    var list = conn.QueryByPage<Article>("GetArticlePage", args?.v);
+                    var list = conn.QueryByPage<Article>("GetArticlePage", args);
                     return new PageResult<Article>
                     {
                         ListValue = list,
-                        Page = args?.v?.PageInfo
+                        Page = args?.PageInfo
                     };
                 }
 

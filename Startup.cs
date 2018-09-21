@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using MmWizard.Db;
 using MmWizard.Helper;
+using MmWizard.Middle;
 using MmWizard.Models;
 using MySql.Data.MySqlClient;
 using StackExchange.Redis.Extender;
@@ -64,7 +65,12 @@ namespace MmWizard
             //    var db = RedisConnectionManager.GetDatabase(SiteConfig.RedisConfig(),2);
             //    db.Set("abc", "123");
             //}
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(option =>
+            {
+                //option.Filters.Add(typeof(MvcParseJsonFilter));
+                option.Filters.Add(typeof(MvcRemoveJsonFilter));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            //.AddJsonOptions(opt => { opt.SerializerSettings.Converters.Add(new UdfJsonConverter()); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
