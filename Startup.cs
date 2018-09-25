@@ -66,7 +66,8 @@ namespace MmWizard
             //    db.Set("abc", "123");
             //}
             services.AddMvc(option =>
-            {
+                {
+                    option.Filters.Add(typeof(CustomExceptionFilterAttribute));
                 //option.ModelBinderProviders.Insert(0, new ArgsModelBinderProvider());
                 //option.Filters.Add(typeof(MvcParseJsonFilter));
                 option.Filters.Add(typeof(MvcAddResultJsonFilter));

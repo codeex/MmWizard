@@ -1,0 +1,50 @@
+﻿@using MmWizard.Db
+@using MmWizard.Models;
+@using Newtonsoft.Json
+@model PageInfo
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="dataTables_info" id="tableContent_info" role="status" aria-live="polite">共@(Model.TotalCount)条</div>
+        </div>
+        <div class="col-sm-7">
+            <div class="dataTables_paginate paging_simple_numbers" id="tableContent_paginate">
+                @if (Model != null)
+                {
+                    var total = Math.Ceiling(Model.TotalCount * 1.0 / Model.PageSize);
+                    var first = 10 * (Model.CurrentPage / 10) + 1;
+                    var pre = Math.Max(Model.CurrentPage - 1, 1);
+                    var next = Math.Min(Model.CurrentPage + 1, total);
+
+                    <ul class="pagination">
+                        <li class="paginate_button previous disabled" id="tableContent_previous">
+                            <a href="#" onclick="javascript:loadData(@(pre))" aria-controls="tableContent" data-dt-idx="0" tabindex="0">上页</a>
+                        </li>
+                        @for (int i= first, j=0;i<= total; i++,j++)
+                        {
+                            if (j >= 10)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                var a = (i == Model.CurrentPage) ? "active" : "";
+                                <li class="paginate_button @(a)">
+                                    <a href="#" onclick="javascript:loadData(@(i))" aria-controls="tableContent" data-dt-idx="1" tabindex="0">@(i)</a>
+                                </li>
+                            }
+                        }
+                        
+                        <li class="paginate_button next disabled" id="tableContent_next">
+                            <a href="#" onclick="javascript:loadData(@(next))" aria-controls="tableContent" data-dt-idx="2" tabindex="0">下页</a>
+                        </li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>

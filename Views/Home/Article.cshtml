@@ -1,20 +1,124 @@
-﻿@{
+﻿@using MmWizard.Db
+@using MmWizard.Models;
+@using Newtonsoft.Json
+@model MmWizard.Db.PageResult<Article>
+@{
     ViewData["Title"] = "Contact";
     Layout = null;
 }
+
+<section class="content-header">
+    <h1>
+        Article
+        <small>文章列表</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-newspaper-o"></i> Home</a></li>
+        <li class="active">Article</li>
+    </ol>
+</section>
 <section class="content container-fluid">
-    <h2>@ViewData["Title"]</h2>
     <h3>@ViewData["Message"]</h3>
 
-    <address>
-        One Microsoft Way<br />
-        Redmond, WA 98052-6399<br />
-        <abbr title="Phone">P:</abbr>
-        425.555.0100
-    </address>
+    <table id="tableContent" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>KeyWords</th>
+            <th>Author</th>
+            <th>UpdatedDate</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+    @{ await Html.RenderPartialAsync("Paging", Model?.Page);}
 
-<address>
-    <strong>Support:</strong> <a href="mailto:Support@example.com">Support@example.com</a><br />
-    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-</address>
 </section>
+ 
+<script>
+    var apiUri = "/api/Article/GetArticlePage";
+    var data =  @Html.Raw(Model?.ListValue == null? "[]": JsonConvert.SerializeObject(Model.ListValue));
+    var page =  @Html.Raw(Model?.Page == null? "{}": JsonConvert.SerializeObject(Model.Page));
+    $(function() {
+        var table = $('#tableContent').DataTable({
+            language: {
+                url: '/dist/js/zh_cn.json'
+            },
+            'dom':'t',
+            'paging': false,
+            'lengthChange': false,
+            'searching': false,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            select: true,
+            data: data,
+            "recordsTotal": 5000,
+            "pageLength": 50,
+            columns: [
+                { data: 'Id' },
+                { data: 'Title' },
+                { data: 'KeyWords' },
+                { data: 'Author' },
+                { data: 'UpdatedDate' }
+            ]
+        });
+        //table.ajax.url('/api/Article/GetArticlePage.json').load();
+        //getPageInfo();
+        $('.pagination a').each(function () {
+            $(this).attr('data-ajax', true);
+            $(this).attr('data-ajax-mode', 'replace');
+            $(this).attr('data-ajax-update', ".content-wrapper");
+            $(this).attr('href', '/Home/Article?' + '');
+        });
+    });
+
+    function getPageInfo() {
+        page.IsGetTotalCount = true;
+        $.ajax({
+            url: apiUri,
+            type: "POST",
+            data:JSON.stringify({
+            tk:'',
+            lng:'zh_cn',
+            v: {
+                QueryModel:{},
+                PageInfo:page
+            }
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (message) {
+                if (message > 0) {
+                    console.log("请求已提交！我们会尽快与您取得联系");
+                }
+            },
+            error: function (message) {
+                console.log("提交数据失败！");
+            }
+    });
+    }
+    function loadData(pageIndex) {
+        //evt.preventDefault();
+        var theLink = $('#ajaxArticle');
+        $(this).attr('data-ajax', true);
+        $(this).attr('data-ajax-mode', 'replace');
+        $(this).attr('data-ajax-update', ".content-wrapper");
+        $(this).attr('href', theLink.href);
+        $(this).trigger("click");
+        console.log($(this));
+        return false;
+        
+        $.asyncRequest(theLink, {
+            url: theLink.href,
+            type: "GET",
+            data: []
+        });
+        return false;
+    }
+</script>
+

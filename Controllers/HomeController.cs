@@ -9,6 +9,7 @@ using MmWizard.Models;
 using Dapper;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using MmWizard.Middle;
 using MmWizard.Protocol;
 
 namespace MmWizard.Controllers
@@ -38,15 +39,31 @@ namespace MmWizard.Controllers
             return View();
         }
 
-        public IActionResult Article()
+        public IActionResult Article(SearchParameters sp)
         {
-            SearchParameters sp = new SearchParameters();
+            if (sp?.PageInfo?.IsGetTotalCount != null)
+            {
+                sp.PageInfo.IsGetTotalCount = true;
+            }
+
+            if (sp == null)
+            {
+                sp = new SearchParameters()
+                {
+                    PageInfo = new PageInfo
+                    {
+                        IsGetTotalCount = true,
+                        PageSize = 50
+                    }
+                };
+            }
+            
             var ret = this._controller.GetArticlePage(new Args<SearchParameters>
             {
                 v = sp,
             });
 
-            return View();
+            return View(ret);
         }
 
         public IActionResult Privacy()

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="~/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- Ionicons -->
     <link rel="stylesheet" href="~/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="~/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
     <!-- Pace style -->
     <link href="~/dist/plugins/pace/pace.css" rel="stylesheet" />
     <!-- Theme style -->
@@ -29,27 +30,27 @@
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
     @*<nav class="navbar navbar-inverse navbar-fixed-top">
-                <div class="container">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">MmWizard</a>
-                    </div>
-                    <div class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav">
-                            <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                            <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                            <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                        </ul>
-                    </div>
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">MmWizard</a>
                 </div>
-            </nav>
-        
-            <partial name="_CookieConsentPartial" />*@
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <partial name="_CookieConsentPartial" />*@
 
 
     <div class="wrapper">
@@ -260,7 +261,7 @@
                     <li class="header">HEADER</li>
                     <!-- Optionally, you can add icons to the links -->
                     <li class="active"><a asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-                    <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update=".content-wrapper" asp-area="" asp-controller="Home" asp-action="Article"><i class="fa fa-newspaper-o"></i> <span>Article</span></a></li>
+                    <li><a id="ajaxArticle" data-ajax="true" data-ajax-mode="replace" data-ajax-update=".content-wrapper" asp-area="" asp-controller="Home" asp-action="Article"><i class="fa fa-newspaper-o"></i> <span>Article</span></a></li>
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-tag"></i> <span>Multilevel</span>
@@ -388,10 +389,12 @@
     <script src="~/bower_components/PACE/pace.min.js"></script>
     <script src="~/bower_components/fastclick/lib/fastclick.js"></script>
     <script src="~/bower_components/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
     <!-- page script -->
     <script type="text/javascript">
         // To make Pace works on Ajax calls
-        $(document).ajaxStart(function() {
+        $(document).ajaxStart(function () {
             Pace.restart();
         });
     </script>
