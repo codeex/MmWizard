@@ -8,15 +8,24 @@ using MmWizard.Db;
 using MmWizard.Models;
 using Dapper;
 using System.Threading;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using MmWizard.Protocol;
 
 namespace MmWizard.Controllers
 {
     public class HomeController : Controller
     {
         private IDbService _db;
-        public HomeController(IDbService db)
+        /// <summary>
+        /// 如果调用其他控制器，需要启用 services.AddMvc().AddControllersAsServices();
+        /// 此方式一般不推荐，如果有共用的方法调用，大可封装为共用的注入方法，两个控制器都引用
+        /// 此处偷懒了，采用mvc控制器调用api控制器方式，保持与前端调用api控制器的一致性
+        /// </summary>
+        private ArticleController _controller;
+        public HomeController(IDbService db, ArticleController controller)
         {
             this._db = db;
+            this._controller = controller;
         }
         public IActionResult Index()
         {
@@ -31,10 +40,11 @@ namespace MmWizard.Controllers
 
         public IActionResult Article()
         {
-            using (var conn = _db.GetConn())
+            SearchParameters sp = new SearchParameters();
+            var ret = this._controller.GetArticlePage(new Args<SearchParameters>
             {
-                var a = conn.Conn.Query<Article>(SiteConfig.GetSql("GetBigClass"));
-            }
+                v = sp,
+            });
 
             return View();
         }

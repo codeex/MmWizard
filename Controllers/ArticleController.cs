@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using MmWizard.Db;
 using MmWizard.Helper;
 using MmWizard.Models;
@@ -20,21 +21,19 @@ namespace MmWizard.Controllers
             
         }
 
-        public Result<PageResult<Article>> GetArticlePage(SearchParameters args)
+        public PageResult<Article> GetArticlePage(Args<SearchParameters> args)
         {
-            return Execute(() =>
-            {
-                using (var conn = this._db.GetConn())
-                {
-                    var list = conn.QueryByPage<Article>("GetArticlePage", args);
-                    return new PageResult<Article>
-                    {
-                        ListValue = list,
-                        Page = args?.PageInfo
-                    };
-                }
+            //var otherController = this.HttpContext.RequestServices.GetService(typeof(IControllerActivator));
 
-            });
+            using (var conn = this._db.GetConn())
+            {
+                var list = conn.QueryByPage<Article>("GetArticlePage", args?.v);
+                return new PageResult<Article>
+                {
+                    ListValue = list,
+                    Page = args?.v.PageInfo
+                };
+            }
         }
     }
 }

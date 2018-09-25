@@ -4,6 +4,6 @@
     select * from article;
   </GetBigClass>
   <GetArticlePage>
-    select * from article;
+    select * from article
   </GetArticlePage>
 </MySql>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -48,17 +49,44 @@ namespace MmWizard.Middle
         }
     }
 
-    public class MvcRemoveJsonFilter : IActionFilter
+    public class MvcAddResultJsonFilter : IActionFilter
     {
         public void OnActionExecuting(ActionExecutingContext context)
         {
             
         }
 
+        private static string GetExceptionString(Exception ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            while (ex != null)
+            {
+                sb.AppendFormat(
+                    "\r\n[ExceptionMessage]:{0}\r\n[ExceptionStackTrace]:{1}\r\n-------------------------------------------------------------------------------\r\n",
+                    ex.Message, ex.StackTrace);
+                ex = ex.InnerException;
+            }
+
+            return sb.ToString();
+        }
+
         public void OnActionExecuted(ActionExecutedContext context)
         {
             if (context.Controller is MyController)
             {
+                if (context.Exception != null)
+                {
+                    context.ExceptionHandled = true;
+                    var result = new Result<object>
+                    {
+                        v = null,
+                        c = 500,
+                        msg = GetExceptionString(context.Exception),
+                    };
+                    context.Result = new ObjectResult(result);
+                    return;
+                }
+
                 var p = context.Result;
                 if (p is ObjectResult objectResult)
                 {
@@ -68,7 +96,11 @@ namespace MmWizard.Middle
                         return;
                     }
 
-                    objectResult.Value = 
+                    objectResult.Value = new Result<object>
+                    {
+                        v = objectResult.Value,
+                        c = 300,
+                    };
                 }
             }
             //throw new NotImplementedException();

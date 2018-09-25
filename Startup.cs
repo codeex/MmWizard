@@ -67,9 +67,11 @@ namespace MmWizard
             //}
             services.AddMvc(option =>
             {
+                //option.ModelBinderProviders.Insert(0, new ArgsModelBinderProvider());
                 //option.Filters.Add(typeof(MvcParseJsonFilter));
-                option.Filters.Add(typeof(MvcRemoveJsonFilter));
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                option.Filters.Add(typeof(MvcAddResultJsonFilter));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddControllersAsServices();
             //.AddJsonOptions(opt => { opt.SerializerSettings.Converters.Add(new UdfJsonConverter()); });
         }
 
